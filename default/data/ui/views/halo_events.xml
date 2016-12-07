@@ -1,0 +1,27 @@
+<form>
+	<label>Halo Events</label>
+	<description/>
+	<fieldset autoRun="true" submitButton="false">
+		<input type="time" searchWhenChanged="true">
+			<default/>
+		</input>
+	</fieldset>
+	<row>
+		<event>
+			<title>Events</title>
+			<searchString>index=cloudpassage sourcetype=cp_halo</searchString>
+			<earliestTime>$earliest$</earliestTime>
+			<latestTime>$latest$</latestTime>
+			<option name="list.drilldown">full</option>
+			<option name="list.wrap">1</option>
+			<option name="maxLines">5</option>
+			<option name="raw.drilldown">full</option>
+			<option name="rowNumbers">0</option>
+			<option name="table.drilldown">1</option>
+			<option name="table.sortDirection">asc</option>
+			<option name="table.wrap">1</option>
+			<option name="type">list</option>
+			<fields>["host","source","sourcetype"]</fields>
+		</event>
+	</row>
+</form>

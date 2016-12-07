@@ -1,0 +1,152 @@
+<form script="table_data_bar.js" stylesheet="table_data_bar.css">
+  <label>Halo Dashboard</label>
+  <description/>
+  <fieldset autoRun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <default>
+        <earliestTime>-24h@h</earliestTime>
+        <latestTime>now</latestTime>
+      </default>
+    </input>
+  </fieldset>
+  <row grouping="2">
+    <single>
+      <searchString>index=cloudpassage sourcetype=cp_halo critical=true | stats count</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="linkView">search</option>
+      <option name="afterLabel">Critical Violations</option>
+    </single>
+    <single>
+      <searchString>index=cloudpassage sourcetype=cp_halo critical=false | stats count</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="linkView">search</option>
+      <option name="afterLabel">Non-Critical Violations</option>
+    </single>
+  </row>
+  <row>
+    <table>
+      <title>Top Event Types</title>
+      <searchString>index=cloudpassage 
+| stats count as events sparkline by name
+| sort -events</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="displayRowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">row</option>
+      <option name="count">10</option>
+      <format type="sparkline" field="sparkline">
+        <option name="lineColor">#5379af</option>
+        <option name="fillColor">#CCDDFF</option>
+        <option name="lineWidth">1</option>
+        <option name="height">20px</option>
+      </format>
+      <drilldown>
+        <link>halo_event_search?form.s_name=$row.name$</link>
+      </drilldown>
+    </table>
+    <chart>
+      <title>Events Over Time</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo
+| timechart count by critical
+| rename true as Critical false as Non-critical</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">top</option>
+      <option name="charting.fieldColors">{"Critical":0xd31820, "Non-critical":0x004990}</option>
+      <option name="height">300px</option>
+    </chart>
+    <table id="table1">
+      <title>Events By Policy</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo
+| top limit=100 policy_name</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="displayRowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">row</option>
+      <option name="count">10</option>
+      <drilldown>
+        <link>halo_event_search?form.s_policy_name=$row.policy_name$</link>
+      </drilldown>
+    </table>
+  </row>
+  <row>
+    <chart>
+      <title>Events by Server Group</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo 
+| stats count by server_group_name
+| sort -count limit=10</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="displayRowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">bar</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">none</option>
+      <option name="charting.seriesColors">[0x00aeef, 0x179caa, 0xd31820, 0x00a950, 0x4d85c5, 0x3cb3ca, 0x004990]</option>
+      <option name="charting.legend.masterLegend">null</option>
+      <drilldown>
+        <link>halo_event_search?form.s_server_group_name=$row.server_group_name$</link>
+      </drilldown>
+    </chart>
+    <table>
+      <title>Events by Server Group</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo 
+| stats count by server_group_name
+| sort -count</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="displayRowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+      <drilldown>
+        <link>halo_event_search?form.s_server_group_name=$row.server_group_name$</link>
+      </drilldown>
+    </table>
+  </row>
+  <row>
+    <table>
+      <title>Last 10 Events</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo
+| head 10
+| table _time name type critical policy_name message</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="displayRowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+      <option name="count">10</option>
+    </table>
+  </row>
+</form>

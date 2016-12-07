@@ -1,0 +1,89 @@
+<form>
+  <label>Violation Distribution</label>
+  <description/>
+  <fieldset autoRun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <default>
+        <earliestTime>-24h@h</earliestTime>
+        <latestTime>now</latestTime>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <chart>
+      <title>Server Count by Event Type</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo
+( name="File Integrity object signature changed" OR name="File Integrity object missing" OR name="File Integrity object added" OR name="Configuration rule matched" OR name="Software vulnerability detected" OR name="Daemon compromised" OR name="Server firewall modified" OR name="Multiple root accounts detected" )
+| stats distinct_count(server_hostname) by name | sort count desc</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleX.text">Event Type</option>
+      <option name="charting.axisTitleY.text">Count of Distinct Servers</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">bar</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">none</option>
+      <option name="height">300px</option>
+      <option name="charting.seriesColors">[0x00aeef, 0x179caa, 0xd31820, 0x00a950, 0x4d85c5, 0x3cb3ca, 0x004990]</option>
+    </chart>
+  </row>
+  <row>
+    <chart>
+      <title>Group Count by Event Type</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo ( name="File Integrity object signature changed" OR name="File Integrity object missing" OR name="File Integrity object added" OR name="Configuration rule matched" OR name="Software vulnerability detected" OR name="Daemon compromised" OR name="Server firewall modified" OR name="Multiple root accounts detected" ) | stats distinct_count(server_group_name) by name | sort count desc</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleX.text">Event Type</option>
+      <option name="charting.axisTitleY.text">Count of Distinct Groups</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">bar</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">none</option>
+      <option name="height">300px</option>
+      <option name="charting.seriesColors">[0x00aeef, 0x179caa, 0xd31820, 0x00a950, 0x4d85c5, 0x3cb3ca, 0x004990]</option>
+    </chart>
+  </row>
+  <row>
+    <chart>
+      <title/>
+      <searchString>index=cloudpassage sourcetype=cp_halo  ( name="File Integrity object signature changed" OR name="File Integrity object missing" OR name="File Integrity object added" OR name="Configuration rule matched" OR name="Software vulnerability detected" OR name="Daemon compromised" OR name="Server firewall modified" OR name="Multiple root accounts detected" ) | stats distinct_count(name) by server_hostname | sort count des</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleX.text">Server Hostname</option>
+      <option name="charting.axisTitleY.text">Count of Distinct Violation Types</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">bar</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">none</option>
+      <option name="height">300px</option>
+      <option name="charting.seriesColors">[0x00aeef, 0x179caa, 0xd31820, 0x00a950, 0x4d85c5, 0x3cb3ca, 0x004990]</option>
+    </chart>
+  </row>
+</form>

@@ -1,0 +1,20 @@
+<nav search_view="search">
+
+  <view name="cloudpassage_dashboard"/>
+  <view name="halo_event_search"/>
+  <view name="violation_dashboard"/>
+  <view name="time_dashboard"/>
+  <view name="distribution_dashboard"/>
+
+  <view name="actor_ip__map"/>
+  <view name="violation_map"/>
+
+  <!-- (Menu bar is getting too cluttered)
+  <view name="search"/>
+  <view name="data_models" />
+  <view name="reports" />
+  <view name="alerts" />
+  -->
+  <view name="dashboards" />
+  
+</nav>

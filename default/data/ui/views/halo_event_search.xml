@@ -1,0 +1,66 @@
+<form>
+  <label>Halo Event Search</label>
+  <fieldset autoRun="true" submitButton="false">
+    <input type="dropdown" token="s_name">
+      <label>Name</label>
+      <choice value="*">ANY</choice>
+      <populatingSearch fieldForLabel="name" fieldForValue="name">index=cloudpassage sourcetype=cp_halo 
+| stats count by name 
+| sort +name</populatingSearch>
+      <default>*</default>
+    </input>
+    <input type="dropdown" token="s_server_hostname">
+      <label>Server</label>
+      <choice value="*">ANY</choice>
+      <populatingSearch fieldForLabel="server_hostname" fieldForValue="server_hostname">index=cloudpassage sourcetype=cp_halo 
+| stats count by server_hostname
+| sort +server_hostname</populatingSearch>
+      <default>*</default>
+    </input>
+    <input type="dropdown" token="s_server_group_name">
+      <label>Server Group</label>
+      <choice value="*">ANY</choice>
+      <populatingSearch fieldForLabel="server_group_name" fieldForValue="server_group_name">index=cloudpassage sourcetype=cp_halo 
+| stats count by server_group_name 
+| sort +server_group_name</populatingSearch>
+      <default>*</default>
+    </input>
+    <input type="dropdown" token="s_policy_name">
+      <label>Policy Name</label>
+      <choice value="*">ANY</choice>
+      <populatingSearch fieldForLabel="policy_name" fieldForValue="policy_name">index=cloudpassage sourcetype=cp_halo 
+| stats count by policy_name 
+| sort +policy_name</populatingSearch>
+      <default>*</default>
+    </input>
+    <input type="dropdown" token="s_critical">
+      <label>Critical</label>
+      <choice value="*">ANY</choice>
+      <choice value="true">True</choice>
+      <choice value="false">False</choice>
+      <default>*</default>
+    </input>
+    <input type="time" searchWhenChanged="true">
+      <default>
+        <earliestTime>-24h@h</earliestTime>
+        <latestTime>now</latestTime>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <table>
+      <title>Events</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo | fillnull value="" name server_group_name policy_name server_hostname critical
+ | search name="$s_name$" server_group_name="$s_server_group_name$" policy_name="$s_policy_name$" server_hostname="$s_server_hostname$" critical="$s_critical$"
+ | table _time name type policy_name server_hostname server_group_name critical message
+ | rename _time as Time, name as Name, type as Type, policy_name as "Policy Name", server_hostname as "Server Hostname", server_group_name as "Server Group", critical as Critical, message as Message</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+      <option name="count">20</option>
+    </table>
+  </row>
+</form>

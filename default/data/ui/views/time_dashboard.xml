@@ -1,0 +1,116 @@
+<form>
+  <label>Violations Over Time Dashboard</label>
+  <description/>
+  <fieldset autoRun="true" submitButton="false">
+    <input type="time" searchWhenChanged="true">
+      <default>
+        <earliestTime>-24h@h</earliestTime>
+        <latestTime>now</latestTime>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <chart>
+      <title>Violations By Type Over Time</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo ( name="File Integrity object signature changed" OR name="File Integrity object missing" OR name="File Integrity object added" OR name="Configuration rule matched" OR name="Software vulnerability detected" OR name="Daemon compromised" OR name="Server firewall modified" OR name="Multiple root accounts detected" ) | timechart count by name</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleX.text">Time</option>
+      <option name="charting.axisTitleY.text">Violation Count by Type</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">area</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">top</option>
+      <option name="height">300px</option>
+      <option name="charting.seriesColors">[0x00aeef, 0x179caa, 0xd31820, 0x00a950, 0x4d85c5, 0x3cb3ca, 0x004990]</option>
+    </chart>
+  </row>
+  <row>
+    <chart>
+      <title>Violations By Server Over Time</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo
+( name="File Integrity object signature changed" OR name="File Integrity object missing" OR name="File Integrity object added" OR name="Configuration rule matched" OR name="Software vulnerability detected" OR name="Daemon compromised" OR name="Server firewall modified" OR name="Multiple root accounts detected" )
+| timechart count by server_hostname</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleX.text">Time</option>
+      <option name="charting.axisTitleY.text">Violation Count by Server</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">area</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">top</option>
+      <option name="height">300px</option>
+      <option name="charting.seriesColors">[0x00aeef, 0x179caa, 0xd31820, 0x00a950, 0x4d85c5, 0x3cb3ca, 0x004990]</option>
+    </chart>
+  </row>
+  <row>
+    <chart>
+      <title>Violations By Server Group Over Time</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo 
+( name="File Integrity object signature changed" OR name="File Integrity object missing" OR name="File Integrity object added" OR name="Configuration rule matched" OR name="Software vulnerability detected" OR name="Daemon compromised" OR name="Server firewall modified" OR name="Multiple root accounts detected" )
+| timechart count by server_group_name</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleX.text">Time</option>
+      <option name="charting.axisTitleY.text">Violation Count by Group</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">area</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">top</option>
+      <option name="height">300px</option>
+      <option name="charting.seriesColors">[0x00aeef, 0x179caa, 0xd31820, 0x00a950, 0x4d85c5, 0x3cb3ca, 0x004990]</option>
+    </chart>
+  </row>
+  <row>
+    <chart>
+      <title>Violations Over Time</title>
+      <searchString>index=cloudpassage sourcetype=cp_halo  ( name="File Integrity object signature changed" OR name="File Integrity object missing" OR name="File Integrity object added" OR name="Configuration rule matched" OR name="Software vulnerability detected" OR name="Daemon compromised" OR name="Server firewall modified" OR name="Multiple root accounts detected" ) | timechart count</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisTitleX.text">Time</option>
+      <option name="charting.axisTitleY.text">Violation Count</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">area</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">none</option>
+      <option name="height">300px</option>
+      <option name="charting.seriesColors">[0x00aeef, 0x179caa, 0xd31820, 0x00a950, 0x4d85c5, 0x3cb3ca, 0x004990]</option>
+    </chart>
+  </row>
+</form>

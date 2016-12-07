@@ -1,0 +1,26 @@
+<form>
+	<label>Actor IP - Map</label>
+	<fieldset autoRun="true" submitButton="false">
+		<input type="time" searchWhenChanged="true">
+			<default/>
+		</input>
+	</fieldset>
+	<row>
+		<map id="element3">
+			<searchString>index=cloudpassage sourcetype=cp_halo 
+| iplocation actor_ip_address
+| geostats latfield=lat longfield=lon count</searchString>
+			<earliestTime>$earliest$</earliestTime>
+			<latestTime>$latest$</latestTime>
+			<option name="mapping.markerLayer.markerOpacity">0.8</option>
+			<option name="mapping.markerLayer.markerMinSize">10</option>
+			<option name="mapping.markerLayer.markerMaxSize">50</option>
+			<option name="mapping.data.maxClusters">1000</option>
+			<option name="mapping.map.center">(39.8282,-98.5795)</option>
+			<option name="mapping.map.zoom">3</option>
+			<option name="mapping.tileLayer.minZoom">2</option>
+			<option name="mapping.tileLayer.maxZoom">10</option>
+			<option name="height">500px</option>
+		</map>
+	</row>
+</form>
