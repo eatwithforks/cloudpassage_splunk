@@ -14,7 +14,7 @@ import json, md5
 import os.path
 import datetime
 import time
-from event import Event
+
 import cpapi, cputils
 
 #set up logging
@@ -34,7 +34,7 @@ SCHEME = """<scheme>
     <use_single_instance>false</use_single_instance>
 
     <endpoint>
-        <args>
+        <args>    
             <arg name="auth_id">
                 <title>Key ID</title>
                 <description>The ID of the account, used for authorization</description>
@@ -71,9 +71,9 @@ def isPresent(obj,key):
         return False
 
 def do_validate():
-    config = get_validation_config()
+    config = get_validation_config() 
     #TODO
-    #if error , print_validation_error & sys.exit(2)
+    #if error , print_validation_error & sys.exit(2) 
     if not isPresent(config,'auth_id'):
         print_validation_error("Missing Authorization ID")
         sys.exit(2)
@@ -90,9 +90,9 @@ def do_validate():
             print_validation_error("start date: %s" % msg)
             sys.exit(2)
     # should do more validation on config['endpoint'], like making sure it's a proper URL
-
+    
 def do_run():
-    config = get_input_config()
+    config = get_input_config()  
     #TODO , poll for data and print output to STD OUT
     #if error , logging.error & sys.exit(2)
     url = config['name']
@@ -106,6 +106,8 @@ def do_run():
         logging.info("cphalo: no proxy")
     authSecret = config['auth_secret']
     logging.info("cphalo: apiURL=%s" % apiURL)
+    #logging.info("cphalo: authID=%s" % authKeyID)
+    #logging.info("cphalo: authSecret=%s" % authSecret)
     apiCon = cpapi.CPAPI()
     (apiCon.key_id, apiCon.secret) = (authKeyID, authSecret)
     if apiURL.endswith('/'):
@@ -113,57 +115,82 @@ def do_run():
     apiCon.base_url = apiURL
     if (proxy != None):
         apiCon.setProxy(proxy)
-    logging.info("cphalo: config= %s" % config)
     timestamp = load_checkpoint(config, url)
-    logging.info("cphalo: load_checkpoint= %s" % timestamp)
-
-    if not timestamp:
-        if 'startdate' in config:
-            (ok, msg) = cputils.verifyISO8601(config['startdate'])
-            if not ok:
-                logging.error("Formatting Error -- start date: %s" % msg)
-                sys.exit(1)
+    if (timestamp):
+        logging.info("cphalo: startingTimestamp=%s" % timestamp)
+    else:
+        if isPresent(config,'startdate'):
             timestamp = config['startdate']
-        else:
-            timestamp = datetime.datetime.today().date() - datetime.timedelta(days=90)
-
-    logging.info("cphalo: startingTimestamp=%s" % timestamp)
-    timestamp = processEventBatches(timestamp, authKeyID, authSecret)
+            if (len(timestamp) < 1):
+                timestamp = None # don't accept blank string
+            else:
+                (ok, msg) = cputils.verifyISO8601(timestamp)
+                if (not ok):
+                    logging.error("start date: %s" % msg)
+                    sys.exit(1)
+        logging.info("cphalo: no starting timestamp found")
+    timestamp = processEventBatches(apiCon,timestamp)
     logging.info("cphalo: lastEventTimestamp=%s" % timestamp)
     if (timestamp != None):
-        # # timestamp = cputils.getNowAsISO8601() # use this for current system time
-        # if type(timestamp) is datetime.date:
-        #     timeObj = timestamp
-        # else:
-        #     timeObj = cputils.strToDate(timeObj)
-        # if (timeObj != None):
-        #     twoMillisecond = datetime.timedelta(0,0,2000)
-        #     newTimeObj = timeObj + twoMillisecond
-        #     timestamp = cputils.formatTimeAsISO8601(newTimeObj)
+        # timestamp = cputils.getNowAsISO8601() # use this for current system time
+        timeObj = cputils.strToDate(timestamp)
+        if (timeObj != None):
+            twoMillisecond = datetime.timedelta(0,0,2000)
+            newTimeObj = timeObj + twoMillisecond
+            timestamp = cputils.formatTimeAsISO8601(newTimeObj)
         logging.info("cphalo: checkpointTimestamp=%s" % timestamp)
         save_checkpoint(config,url,timestamp)
     else:
         logging.info("cphalo: no events, not updating checkpoint")
 
-def processEventBatches(connLastTimestamp, authKeyID, authSecret):
-    event = Event(authKeyID, authSecret)
-    print "<stream>"
-    logging.info("cphalo: processEventBatches_first %s" % type(connLastTimestamp))
 
-    initial_event_id = event.latest_event("1", "", "1")["events"][0]["id"]
-    flag = True
-    while flag:
+def processEventBatches(apiCon,connLastTimestamp,events_per_page=100):
+    resp = apiCon.authenticateClient()
+    if (not resp):
+        logging.error("Failed to authenticate to CP Halo Portal")
+        sys.exit(1)
+    print "<stream>"
+    nextLink = apiCon.getInitialLink(connLastTimestamp, events_per_page)
+    eventCount = 0
+    retryCount = 0
+    while (nextLink):
         try:
-            batched = event.batch(connLastTimestamp)
-        except TypeError:
-            return connLastTimestamp
-        start_date, connLastTimestamp = event.loop_date(batched, connLastTimestamp)
-        logging.info("cphalo: processEventBatches")
-        formatEvents(batched)
-        if event.id_exists_check(batched, initial_event_id):
-            flag = False
+            (batch, authError) = apiCon.getEventBatch(nextLink)
+            if (authError):
+                # An auth error is likely to happen if our token expires (after 15 minutes or so).
+                # If so, we try to renew our session by logging in again (gets a new token).
+                resp = apiCon.authenticateClient()
+                if (not resp):
+                    logging.error("Failed to retrieve authentication token. Exiting...")
+                    sys.exit(1)
+            else:
+                # If we received a batch of events, send them to the destination.
+                (nextLink, connLastTimestamp, numEvents) = dumpEvents(batch)
+                eventCount += numEvents
+                # After each batch, write out config file with latest timestamp (from events),
+                #  so that if we get interrupted during the next batch, we can resume from this point.
+                # credential['timestamp'] = connLastTimestamp
+                # writeTimestamp(configFilename, credentialList)
+                # print "NextLink: %s\t\t%s" % (nextLink, connLastTimestamp)
+                # time.sleep(1000) # for testing only
+                logging.info("cphalo: nextLink=%s" % nextLink)
+                logging.info("cphalo: lastTimestamp=%s" % connLastTimestamp)
+                retryCount = 0 # after successful event-retrieval, reset count of retries
+        except:
+            # should log exact error for debugging purposes
+            if (retryCount < 3):
+                retryCount += 1
+                time.sleep(5) # sleep 5 seconds in case
+                logging.info("Non-fatal error, retrying")
+            else:
+                logging.info("Non-fatal error, too many retries, exiting")
+                break # exit loop, end stream, and rewrite check-point (if we got ANY events)
     print "</stream>"
-    return connLastTimestamp
+    if (eventCount > 0):
+        return connLastTimestamp
+    else:
+        return None
+
 
 def formatEvents(eventList):
     """ Formats a list of events according to the user's settings.
@@ -182,22 +209,53 @@ def formatEvents(eventList):
             logging.info("cphalo: first event in batch: %s" % xmlStr)
 
 
+def dumpEvents(json_str):
+    """ Parses a JSON response to the request for an event batch.
+
+        The requests contains an outer wrapper object, with pagination info
+        and a list of events. We extract the pagination info (contains a link to
+        the next batch of events) and the event list. The event list is passed
+        to formatEvents() to be formatted and sent to the desired output.
+    """
+    numEvents = 0
+    timestampKey = 'created_at'
+    paginationKey = 'pagination'
+    nextKey = 'next'
+    eventsKey = 'events'
+    obj = json.loads(json_str)
+    nextLink = None
+    lastTimestamp = None
+    if (paginationKey in obj):
+        pagination = obj[paginationKey]
+        if ((pagination) and (nextKey in pagination)):
+            nextLink = pagination[nextKey]
+    if (eventsKey in obj):
+        eventList = obj[eventsKey]
+        formatEvents(eventList)
+        numEvents = len(eventList)
+        if (numEvents > 0):
+            lastEvent = eventList[numEvents - 1]
+            if (timestampKey in lastEvent):
+                lastTimestamp = lastEvent[timestampKey]
+    return (nextLink, lastTimestamp, numEvents)
+
+
 # prints validation error data to be consumed by Splunk
 def print_validation_error(s):
     print "<error><message>%s</message></error>" % xml.sax.saxutils.escape(s)
-
+    
 # prints XML stream
 def print_xml_single_instance_mode(s):
     print "<stream><event><data>%s</data></event></stream>" % xml.sax.saxutils.escape(s)
-
+    
 # prints XML stream
 def print_xml_multi_instance_mode(s,stanza):
     print "<stream><event stanza=""%s""><data>%s</data></event></stream>" % stanza,xml.sax.saxutils.escape(s)
-
+    
 # prints simple stream
 def print_simple(s):
     print "%s\n" % s
-
+    
 def usage():
     print "usage: %s [--scheme|--validate-arguments]"
     logging.error("Incorrect Program Usage")
@@ -245,7 +303,7 @@ def get_input_config():
         if not config:
             raise Exception, "Invalid configuration received from Splunk."
 
-
+        
     except Exception, e:
         raise Exception, "Error getting Splunk configuration via STDIN: %s" % str(e)
 
@@ -320,9 +378,9 @@ def get_validation_config():
     return val_data
 
 if __name__ == '__main__':
-
+      
     if len(sys.argv) > 1:
-        if sys.argv[1] == "--scheme":
+        if sys.argv[1] == "--scheme":           
             do_scheme()
         elif sys.argv[1] == "--validate-arguments":
             do_validate()
@@ -330,5 +388,5 @@ if __name__ == '__main__':
             usage()
     else:
         do_run()
-
+        
     sys.exit(0)

@@ -5,7 +5,6 @@ import json
 import urllib
 import urllib2
 import base64
-import requests
 
 
 # Class with calls to CloudPassage API
@@ -92,7 +91,6 @@ class CPAPI:
     def doGetRequest(self, url, token):
         req = urllib2.Request(url)
         req.add_header("Authorization", "Bearer " + token)
-        req.add_header("Content-Type", "application/json")
         try:
             fh = urllib2.urlopen(req)
             data = fh.read()
@@ -101,8 +99,6 @@ class CPAPI:
             # print >> sys.stderr, "Type=%s  Encoding=%s" % (mimetype, encoding)
             translatedData = data.decode(encoding,'ignore').encode('utf-8')
             results = (translatedData, False)
-            print >> sys.stderr, results
-            print >> sys.stderr, url
             return results
         except IOError, e:
             authError = False
