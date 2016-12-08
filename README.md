@@ -6,3 +6,9 @@ The CloudPassage App for Splunk Enterprise leverages the security visibility pro
 
 #### Details and set up instructions:
 https://splunkbase.splunk.com/app/1627/#/details
+
+<!---
+
+#CPTAGS:community-supported archive
+
+-->
